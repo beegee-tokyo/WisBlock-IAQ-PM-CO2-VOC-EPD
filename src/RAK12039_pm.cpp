@@ -70,16 +70,16 @@ void read_rak12039(void)
 	if (PMSA003I.readDate(&data))
 	{
 
-		MYLOG("PMS","PMSA003I read date success.");
+		MYLOG("PMS", "PMSA003I read date success.");
 
-		g_solution_data.addVoc_index(LPP_CHANNEL_PM_1_0,data.pm10_env);
-		g_solution_data.addVoc_index(LPP_CHANNEL_PM_2_5,data.pm25_env);
-		g_solution_data.addVoc_index(LPP_CHANNEL_PM_10_0,data.pm100_env);
+		g_solution_data.addVoc_index(LPP_CHANNEL_PM_1_0, data.pm10_env);
+		g_solution_data.addVoc_index(LPP_CHANNEL_PM_2_5, data.pm25_env);
+		g_solution_data.addVoc_index(LPP_CHANNEL_PM_10_0, data.pm100_env);
 
-		MYLOG("PMS","Std PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d",data.pm10_standard,data.pm25_standard,data.pm100_standard);
-		MYLOG("PMS","Env PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d",data.pm10_env,data.pm25_env,data.pm100_env);
-#if HAS_EPD > 0
-	set_pm_rak14000(data.pm10_env,data.pm25_env,data.pm100_env);
+		MYLOG("PMS", "Std PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d", data.pm10_standard, data.pm25_standard, data.pm100_standard);
+		MYLOG("PMS", "Env PM ug/m3: PM 1.0 %d PM 2.5 %d PM 10 %d", data.pm10_env, data.pm25_env, data.pm100_env);
+#if HAS_EPD == 1 || HAS_EPD == 4
+		set_pm_rak14000(data.pm10_env, data.pm25_env, data.pm100_env);
 #endif
 	}
 	else

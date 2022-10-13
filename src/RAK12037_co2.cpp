@@ -22,9 +22,9 @@ SCD30 scd30;
  */
 bool init_rak12037(void)
 {
-	// // Enable power
-	// pinMode(WB_IO2, OUTPUT);
-	// digitalWrite(WB_IO2, HIGH); // power on RAK12037
+	// Enable power
+	pinMode(WB_IO2, OUTPUT);
+	digitalWrite(WB_IO2, HIGH); // power on RAK12037
 
 	Wire.begin();
 	if (!scd30.begin(Wire))

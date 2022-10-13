@@ -156,7 +156,7 @@ static int at_query_rtc(void)
 
 atcmd_t g_user_at_cmd_list_rtc[] = {
 	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  |*/
-	// GNSS commands
+	// RTC commands
 	{"+RTC", "Get/Set RTC time and date", at_query_rtc, at_set_rtc, at_query_rtc},
 };
 

@@ -2,18 +2,24 @@
 | <img src="./assets/RAK-Whirls.png" alt="RAKWireless"> | <img src="./assets/rakstar.jpg" alt="RAKstar" > | <img src="./assets/Air-Quality-1.jpg" alt="Kit 1" > |    
 | --- | --- | --- |     
 
+This tutorial shows how to build a indoor air quality sensor with the WisBlock eco system.    
+With the release of the new RAK12037 CO2 and RAK12039 Particle Matter sensor the most important air quality indizes can now be measured.    
+The final device in this tutorial is measuring CO2, Particle Matter, VOC, temperature, humidity and barometric pressure. It can be comined with the RAK14000 to display the different values. But more important, it sends the measured values over LoRaWAN for further processing and taking actions.    
+
+### _REMARK 1_     
+This firmware is using the [WisBlock API](https://github.com/beegee-tokyo/WisBlock-API) ⤴️ which helps to create low power consumption application and taking the load to handle communications from your shoulder.    
+
+### _REMARK 2_
+For the displays, the RAK14000 EPD module with the 2.13" display can be used. But for better visualization this code supports as well a 3.52" and a 4.2" display. The 4.2" display might be added as a variant to the WisBlock RAK14000 in the future.
+
+----
+
 # Content
 - [Hardware supported](#hardware_supported)
 - [Software used](#software_used)
 - [How to use it](#how_to_use_it)
 - [Packet data format](#packet_data_format)
-- [Setup Weather Kits](#setup-weather)
-- [Setup GNSS Kits](#setup-gnss)
-- [Setup Air Quality Kits](#setup-air-quality)
-
-This is a new approach for WisBlock. It scans the I2C bus and Serial to detect which WisBlock modules are attached to the WisBlock base and creates an LoRaWAN payload in Cayenne LPP with the data of the found modules. 
-### _REMARK_     
-This firmware is using the [WisBlock API](https://github.com/beegee-tokyo/WisBlock-API) ⤴️ which helps to create low power consumption application and taking the load to handle communications from your shoulder. 
+- [Example for a visualization and alert message](#example-for-a-visualization-and-alert-message)
 
 ----
 
@@ -21,15 +27,10 @@ This firmware is using the [WisBlock API](https://github.com/beegee-tokyo/WisBlo
 | Module | Function |
 | --     | --       |
 | [RAK4631](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK4631/Overview/) ⤴️ | WisBlock Core module |
-| [RAK5005-O](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK5005-O/Overview/) ⤴️ | WisBlock Base board |
-| [RAK19007](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK19007/Overview/) ⤴️ | WisBlock Base board |
-| [RAK19003](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK19003/Overview/) ⤴️ | WisBlock Mini Base board |
 | [RAK19001](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK19001/Overview/) ⤴️ | WisBlock Fullsize Base board |
 | [RAK1901](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1901/Overview/) ⤴️ | WisBlock Temperature and Humidty Sensor |
 | [RAK1902](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1902/Overview/) ⤴️ | WisBlock Barometer Pressure Sensor |
-| [RAK1903](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1903/Overview/) ⤴️ | WisBlock Ambient Light Sensor |
 | [RAK1906](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1906/Overview/) ⤴️ | WisBlock Environment Sensor |
-| [RAK1921](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1921/Overview/) ⤴️ | WisBlock OLED display |
 | [RAK12002](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK12002/Overview/) ⤴️ | WisBlock RTC module |
 | [RAK12010](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK12010/Overview/) ⤴️ | WisBlock Ambient Light sensor |
 | [RAK12019](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK12019/Overview/) ⤴️ | WisBlock UV Light sensor |
@@ -37,10 +38,6 @@ This firmware is using the [WisBlock API](https://github.com/beegee-tokyo/WisBlo
 | [RAK12039](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK12039/Overview/) ⤴️ | WisBlock Particle Matter sensor |
 | [RAK12047](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK12047/Overview/) ⤴️ | WisBlock VOC sensor |
 | [RAK14000](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK14000/Overview/) ⤴️ | WisBlock EPD |
-
-## Power consumption
-The MCU and LoRa transceiver go into sleep mode between measurement cycles to save power. I could measure a sleep current of 40uA of the whole system for a solution that enables sleep. Some solutions, like the RAK12047 VOC sensor, that require more frequent wake-ups, have a higher power consumption.    
-In addition, sensors like the RAK12037 CO2 gas or the RAK12039 PM sensors will consume more power as well.
 
 ----
 
@@ -69,6 +66,7 @@ In addition, sensors like the RAK12037 CO2 gas or the RAK12039 PM sensors will c
 - [Sensirion I2C SGP40](https://registry.platformio.org/libraries/sensirion/Sensirion%20I2C%20SGP40) ⤴️
 - [SparkFun SHTC3 Humidity and Temperature Sensor Library](https://registry.platformio.org/libraries/sparkfun/SparkFun%20SHTC3%20Humidity%20and%20Temperature%20Sensor%20Library) ⤴️
 - [LPS35HW](https://registry.platformio.org/libraries/pilotak/LPS35HW) ⤴️
+- [RAK12039 PM Sensor](https://registry.platformio.org/libraries/beegee-tokyo/RAK12039_PM_Sensor) ⤴️
 - [SparkFun SCD30 Arduino Library](https://registry.platformio.org/libraries/sparkfun/SparkFun%20SCD30%20Arduino%20Library) ⤴️
 - [Adafruit EPD](https://registry.platformio.org/libraries/adafruit/Adafruit%20EPD)
 
@@ -175,54 +173,30 @@ Example decoders for TTN, Chirpstack, Helium and Datacake can be found in the fo
 
 ----
 
-# Compiled output
-The compiled files are located in the [./Generated](./Generated) folder. Each successful compiled version is named as      
-**`WisBlock_SENS_Vx.y.z_YYYY.MM.dd.hh.mm.ss`**    
-x.y.z is the version number. The version number is setup in the [./platformio.ini](./platformio.ini) file.    
-YYYY.MM.dd.hh.mm.ss is the timestamp of the compilation.
+# Example for a visualization and alert message
 
-The generated **`.zip`** file can be used as well to update the device over BLE using either [WisBlock Toolbox](https://play.google.com/store/apps/details?id=tk.giesecke.wisblock_toolbox) ⤴️ or [Nordic nRF Toolbox](https://play.google.com/store/apps/details?id=no.nordicsemi.android.nrftoolbox) ⤴️ or [nRF Connect](https://play.google.com/store/apps/details?id=no.nordicsemi.android.mcp) ⤴️
+As an simple example to visualize the IAQ data and sending an alert, I created a device in [_**Datacake**_](https://datacake.co).    
+Datacake is an easy to use _**Low Code IoT Platform**_. In my Datacake account I setup the device with the matching payload decoder, visualization and creation of an email alert.
 
-----
+## Datacake payload decoder
+In the device configuration the Datacake decoder from the [_**decoders**_](./decoders) folder is used.
 
-# Debug options 
-Debug output can be controlled by defines in the **`platformio.ini`**    
-_**LIB_DEBUG**_ controls debug output of the SX126x-Arduino LoRaWAN library
- - 0 -> No debug outpuy
- - 1 -> Library debug output (not recommended, can have influence on timing)    
+## Datacake fields
+As the SI and PGA values are sent as 10 times of the value, beside of the data fields a formula feed is required to transform the received values to the real values.
 
-_**API_DEBUG**_ controls debug output of the WisBlock-API library
- - 0 -> No debug outpuy
- - 1 -> Library debug output
+| Field Name |  Identifier | Type |
+| --- | --- | --- |
+| VOC index |  VOC_16 |  Integer |  
+| CO2 value |  CONCENTRATION_35 |  Integer |  
+| PM 1.0 |  VOC_40 |  Integer |  
+| PM 2.5 |  VOC_41 |  Integer |  
+| PM 10 |  VOC_42 |  Integer |  
+| Humidity |  HUMIDITY_2 |  Float |  
+| Temperature |  TEMPERATURE_3 |  Float |  
+| Barometric pressure |  BAROMETER_8 |  Float |  
+| Battery |  VOLTAGE_1 |  Float |  
 
-_**MY_DEBUG**_ controls debug output of the application itself
- - 0 -> No debug outpuy
- - 1 -> Application debug output
+## Datacake visualization
+In the dashboard you can show the current status and the latest SI and PGA levels.    
+![Datacake Rule](./assets/datacake-dashboard.png)
 
-_**CFG_DEBUG**_ controls the debug output of the nRF52 BSP. It is recommended to keep it off
-
-## Example for no debug output and maximum power savings:
-
-```ini
-[env:wiscore_rak4631]
-platform = nordicnrf52
-board = wiscore_rak4631
-framework = arduino
-build_flags = 
-	; -DCFG_DEBUG=2
-	-DSW_VERSION_1=1 ; major version increase on API change / not backwards compatible
-	-DSW_VERSION_2=0 ; minor version increase on API change / backward compatible
-	-DSW_VERSION_3=0 ; patch version increase on bugfix, no affect on API
-	-DLIB_DEBUG=0    ; 0 Disable LoRaWAN debug output
-	-DAPI_DEBUG=0    ; 0 Disable WisBlock API debug output
-	-DMY_DEBUG=0     ; 0 Disable application debug output
-	-DNO_BLE_LED=1   ; 1 Disable blue LED as BLE notificator
-lib_deps = 
-	beegee-tokyo/SX126x-Arduino
-	beegee-tokyo/WisBlock-API
-	sparkfun/SparkFun SHTC3 Humidity and Temperature Sensor Library
-	adafruit/Adafruit LPS2X
-	closedcube/ClosedCube OPT3001
-	sabas1080/CayenneLPP
-extra_scripts = pre:rename.py
-```
