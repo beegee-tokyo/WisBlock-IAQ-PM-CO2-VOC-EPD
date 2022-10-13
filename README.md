@@ -21,6 +21,8 @@ For the displays, the RAK14000 EPD module with the 2.13" display can be used. Bu
 - [Packet data format](#packet_data_format)
 - [Example for a visualization and alert message](#example-for-a-visualization-and-alert-message)
 
+<center><img src = "./assets/Air-Quality-4.jpg" alt = "Mounting" width = 50%></center>
+
 ----
 
 # Hardware supported
