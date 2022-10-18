@@ -16,15 +16,15 @@
 //**********************************************/
 //** Set the application firmware version here */
 //**********************************************/
-// ; major version increase on API change / not backwards compatible
+// major version increase on API change / not backwards compatible
 #ifndef SW_VERSION_1
 #define SW_VERSION_1 1
 #endif
-// ; minor version increase on API change / backward compatible
+// minor version increase on API change / backward compatible
 #ifndef SW_VERSION_2
 #define SW_VERSION_2 0
 #endif
-// ; patch version increase on bugfix, no affect on API
+// patch version increase on bugfix, no affect on API
 #ifndef SW_VERSION_3
 #define SW_VERSION_3 8
 #endif
@@ -47,7 +47,7 @@ using namespace std::chrono;
 #define Stream arduino::Stream
 #define SPI mbed::SPI
 
-#endif
+#endif // ARDUINO_ARCH_RP2040
 
 #include <Wire.h>
 /** Include the WisBlock-API */

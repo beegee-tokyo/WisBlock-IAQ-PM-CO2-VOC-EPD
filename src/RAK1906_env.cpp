@@ -98,7 +98,7 @@ bool read_rak1906()
 	g_solution_data.addRelativeHumidity(LPP_CHANNEL_HUMID_2, (float)bme.humidity);
 	g_solution_data.addTemperature(LPP_CHANNEL_TEMP_2, (float)bme.temperature);
 	g_solution_data.addBarometricPressure(LPP_CHANNEL_PRESS_2, (float)(bme.pressure) / 100.0);
-	g_solution_data.addAnalogInput(LPP_CHANNEL_GAS_2, (float)(bme.gas_resistance) / 1000.0);
+	// g_solution_data.addAnalogInput(LPP_CHANNEL_GAS_2, (float)(bme.gas_resistance) / 1000.0);
 
 	_last_temp_rak1906 = bme.temperature;
 	_last_humid_rak1906 = bme.humidity;

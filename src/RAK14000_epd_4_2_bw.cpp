@@ -135,46 +135,6 @@ void init_rak14000(void)
 	xSemaphoreTake(g_epd_sem, 10);
 #endif
 
-	// display.begin();
-
-	// display.setRotation(3);
-	// MYLOG("EPD", "Rotation %d", display.getRotation());
-
-	// // Clear display
-	// display.clearBuffer();
-
-	// // Draw Welcome Logo
-	// display.fillRect(0, 0, DEPG_HP.width, DEPG_HP.height, bg_color);
-	// display.drawBitmap(DEPG_HP.width / 2 - 75, 50, rak_img, 150, 56, txt_color);
-
-	// // If RTC is available, write the date
-	// if (found_sensors[RTC_ID].found_sensor)
-	// {
-	// 	read_rak12002();
-	// 	snprintf(disp_text, 59, "%d/%d/%d %d:%d", g_date_time.date, g_date_time.month, g_date_time.year,
-	// 			 g_date_time.hour, g_date_time.minute);
-	// 	rak14000_text(0, 0, disp_text, (uint16_t)txt_color, 2);
-	// }
-
-	// display.setFont(LARGE_FONT);
-	// display.setTextSize(1);
-	// display.getTextBounds((char *)"IoT Made Easy", 0, 0, &txt_x1, &txt_y1, &txt_w, &txt_h);
-	// rak14000_text(DEPG_HP.width / 2 - (txt_w / 2), 110, (char *)"IoT Made Easy", (uint16_t)txt_color, 2);
-
-	// display.setFont(LARGE_FONT);
-	// display.setTextSize(1);
-	// display.getTextBounds((char *)"RAK10702 Air Quality", 0, 0, &txt_x1, &txt_y1, &txt_w, &txt_h);
-	// rak14000_text(DEPG_HP.width / 2 - (txt_w / 2), 150, (char *)"RAK10702 Air Quality", (uint16_t)txt_color, 2);
-
-	// display.drawBitmap(DEPG_HP.width / 2 - 63, 190, built_img, 126, 66, txt_color);
-
-	// display.setFont(SMALL_FONT);
-	// display.setTextSize(1);
-	// display.getTextBounds((char *)"Wait for connect", 0, 0, &txt_x1, &txt_y1, &txt_w, &txt_h);
-	// rak14000_text(DEPG_HP.width / 2 - (txt_w / 2), 260, (char *)"Wait for connect", (uint16_t)txt_color, 1);
-
-	// display.display(false);
-
 #ifdef ARDUINO_ARCH_RP2040
 	epd_task_handle.start(epd_task);
 	epd_task_handle.set_priority(osPriorityNormal);
@@ -648,7 +608,9 @@ void co2_rak14000(bool has_pm)
 		rak14000_text(x_text + 40 + txt_w2 + 3, y_text + 24, (char *)"ppm", txt_color, 1);
 
 		sprintf(disp_text, "%d", fmax);
-		rak14000_text(DEPG_HP.width / 2 + 15, y_graph + h_bar - 7, (char *)"0ppm", txt_color, 1);
+		rak14000_text(DEPG_HP.width / 2 + 15, y_graph + h_bar - 17, (char *)"200", txt_color, 1);
+		rak14000_text(DEPG_HP.width / 2 + 15, y_graph + h_bar - 7, (char *)"ppm", txt_color, 1);
+		// rak14000_text(DEPG_HP.width / 2 + 15, y_graph + h_bar - 7, (char *)"0ppm", txt_color, 1);
 		rak14000_text(DEPG_HP.width / 2 + 15, y_graph - 7, disp_text, txt_color, 1);
 		rak14000_text(DEPG_HP.width / 2 + 15, y_graph + 3, (char *)"ppm", txt_color, 1);
 
@@ -659,10 +621,12 @@ void co2_rak14000(bool has_pm)
 		// Draw CO2 values
 		for (int idx = 0; idx < num_values; idx++)
 		{
-			if (co2_values[idx] != 0.0)
+			// if (co2_values[idx] != 0.0)
+			if (co2_values[idx] >= 200.0)
 			{
 				display.drawLine((int16_t)(x_graph + (idx * w_bar)),
-								 (int16_t)(y_graph + ((h_bar) - (co2_values[idx] / bar_divider))),
+								//  (int16_t)(y_graph + ((h_bar) - (co2_values[idx] / bar_divider))),
+								 (int16_t)(y_graph + ((h_bar) - ((co2_values[idx] - 200) / bar_divider))),
 								 (int16_t)(x_graph + (idx * w_bar)),
 								 (int16_t)(y_graph + h_bar),
 								 txt_color);

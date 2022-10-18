@@ -76,6 +76,7 @@ void find_modules(void)
 	pinMode(WB_IO6, OUTPUT);
 	// Sensor on
 	digitalWrite(WB_IO6, HIGH);
+	delay(500);
 
 	Wire.begin();
 	// Some modules support only 100kHz
@@ -85,11 +86,6 @@ void find_modules(void)
 		// RAK12039 takes up to 5 seconds before it responds on I2C
 		if (address == 0x12)
 		{
-			// // RAK12039 has extra GPIO for power control
-			// // On/Off control pin
-			// pinMode(WB_IO6, OUTPUT);
-			// // Sensor on
-			// digitalWrite(WB_IO6, HIGH);
 			time_t wait_sensor = millis();
 			MYLOG("SCAN", "RAK12039 scan start %ld ms", millis());
 			while (1)
@@ -136,14 +132,6 @@ void find_modules(void)
 			MYLOG("SCAN", "ID %d addr %02X", i, found_sensors[i].i2c_addr);
 		}
 	}
-
-	// // Create the semaphore for 100kHz I2C usage lock
-	// #if defined NRF52_SERIES || defined ESP32
-	// 	// Create the GNSS event semaphore
-	// 	i2c_lock = xSemaphoreCreateBinary();
-	// 	// Initialize semaphore
-	// 	xSemaphoreGive(i2c_lock);
-	// #endif
 
 	// Initialize the modules found
 	if (found_sensors[TEMP_ID].found_sensor)

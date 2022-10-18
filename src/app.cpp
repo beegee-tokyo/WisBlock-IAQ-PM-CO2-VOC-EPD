@@ -223,88 +223,78 @@ void app_event_handler(void)
 			}
 		}
 
-		if (!found_sensors[GNSS_ID].found_sensor)
+		// Get data from the slower sensors
+		if (found_sensors[ENV_ID].found_sensor)
 		{
-			// Get data from the slower sensors
-			if (found_sensors[ENV_ID].found_sensor)
-			{
-				// Read environment data
-				read_rak1906();
-			}
-			if (found_sensors[PRESS_ID].found_sensor)
-			{
-				// Read environment data
-				read_rak1902();
-			}
+			// Read environment data
+			read_rak1906();
+		}
+		if (found_sensors[PRESS_ID].found_sensor)
+		{
+			// Read environment data
+			read_rak1902();
+		}
 
-// #if HAS_EPD > 0
-// 			// Refresh display
-// 			MYLOG("APP", "Refresh RAK14000");
-// 			wake_rak14000();
-// 			// refresh_rak14000();
-// #endif
-
-			MYLOG("APP", "Packetsize %d", g_solution_data.getSize());
-			if (g_lorawan_settings.lorawan_enable)
+		MYLOG("APP", "Packetsize %d", g_solution_data.getSize());
+		if (g_lorawan_settings.lorawan_enable)
+		{
+			lmh_error_status result = send_lora_packet(g_solution_data.getBuffer(), g_solution_data.getSize());
+			switch (result)
 			{
-				lmh_error_status result = send_lora_packet(g_solution_data.getBuffer(), g_solution_data.getSize());
-				switch (result)
+			case LMH_SUCCESS:
+				if (found_sensors[OLED_ID].found_sensor)
 				{
-				case LMH_SUCCESS:
-					if (found_sensors[OLED_ID].found_sensor)
+					if (found_sensors[RTC_ID].found_sensor)
 					{
-						if (found_sensors[RTC_ID].found_sensor)
-						{
-							read_rak12002();
-							snprintf(disp_txt, 64, "%d:%02d Pkg %d b", g_date_time.hour, g_date_time.minute, g_solution_data.getSize());
-						}
-						else
-						{
-							snprintf(disp_txt, 64, "Packet sent %d b", g_solution_data.getSize());
-						}
-						rak1921_add_line(disp_txt);
+						read_rak12002();
+						snprintf(disp_txt, 64, "%d:%02d Pkg %d b", g_date_time.hour, g_date_time.minute, g_solution_data.getSize());
 					}
-					MYLOG("APP", "Packet enqueued");
-					break;
-				case LMH_BUSY:
-					MYLOG("APP", "LoRa transceiver is busy");
-					AT_PRINTF("+EVT:BUSY\n");
-					break;
-				case LMH_ERROR:
-					AT_PRINTF("+EVT:SIZE_ERROR\n");
-					MYLOG("APP", "Packet error, too big to send with current DR");
-					break;
+					else
+					{
+						snprintf(disp_txt, 64, "Packet sent %d b", g_solution_data.getSize());
+					}
+					rak1921_add_line(disp_txt);
 				}
+				MYLOG("APP", "Packet enqueued");
+				break;
+			case LMH_BUSY:
+				MYLOG("APP", "LoRa transceiver is busy");
+				AT_PRINTF("+EVT:BUSY\n");
+				break;
+			case LMH_ERROR:
+				AT_PRINTF("+EVT:SIZE_ERROR\n");
+				MYLOG("APP", "Packet error, too big to send with current DR");
+				break;
+			}
+		}
+		else
+		{
+			// Send packet over LoRa
+			if (send_p2p_packet(g_solution_data.getBuffer(), g_solution_data.getSize()))
+			{
+				if (found_sensors[OLED_ID].found_sensor)
+				{
+					if (found_sensors[RTC_ID].found_sensor)
+					{
+						read_rak12002();
+						snprintf(disp_txt, 64, "%d:%02d Pkg %d b", g_date_time.hour, g_date_time.minute, g_solution_data.getSize());
+					}
+					else
+					{
+						snprintf(disp_txt, 64, "Packet sent %d b", g_solution_data.getSize());
+					}
+					rak1921_add_line(disp_txt);
+				}
+				MYLOG("APP", "Packet enqueued");
 			}
 			else
 			{
-				// Send packet over LoRa
-				if (send_p2p_packet(g_solution_data.getBuffer(), g_solution_data.getSize()))
-				{
-					if (found_sensors[OLED_ID].found_sensor)
-					{
-						if (found_sensors[RTC_ID].found_sensor)
-						{
-							read_rak12002();
-							snprintf(disp_txt, 64, "%d:%02d Pkg %d b", g_date_time.hour, g_date_time.minute, g_solution_data.getSize());
-						}
-						else
-						{
-							snprintf(disp_txt, 64, "Packet sent %d b", g_solution_data.getSize());
-						}
-						rak1921_add_line(disp_txt);
-					}
-					MYLOG("APP", "Packet enqueued");
-				}
-				else
-				{
-					AT_PRINTF("+EVT:SIZE_ERROR\n");
-					MYLOG("APP", "Packet too big");
-				}
+				AT_PRINTF("+EVT:SIZE_ERROR\n");
+				MYLOG("APP", "Packet too big");
 			}
-			// Reset the packet
-			g_solution_data.reset();
 		}
+		// Reset the packet
+		g_solution_data.reset();
 	}
 
 	// VOC read request event
@@ -417,10 +407,10 @@ void lora_data_handler(void)
 		g_task_event_type &= N_LORA_TX_FIN;
 
 #if HAS_EPD > 0
-			// Refresh display
-			MYLOG("APP", "Refresh RAK14000");
-			wake_rak14000();
-			// refresh_rak14000();
+		// Refresh display
+		MYLOG("APP", "Refresh RAK14000");
+		wake_rak14000();
+		// refresh_rak14000();
 #endif
 		MYLOG("APP", "LoRa TX cycle %s", g_rx_fin_result ? "finished ACK" : "failed NAK");
 
