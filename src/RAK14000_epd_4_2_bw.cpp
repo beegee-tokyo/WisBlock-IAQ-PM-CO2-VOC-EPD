@@ -912,7 +912,7 @@ void epd_task(void *pvParameters)
 
 	display.begin();
 
-	display.setRotation(3);
+	display.setRotation(EPD_ROTATION); // 1 for Gavin 3 for mine
 	MYLOG("EPD", "Rotation %d", display.getRotation());
 
 	// Clear display
@@ -920,7 +920,7 @@ void epd_task(void *pvParameters)
 
 	// Draw Welcome Logo
 	display.fillRect(0, 0, DEPG_HP.width, DEPG_HP.height, bg_color);
-	display.drawBitmap(DEPG_HP.width / 2 - 75, 50, rak_img, 150, 56, txt_color);
+	display.drawBitmap(DEPG_HP.width / 2 - 75, 50, rak_img, 184, 56, txt_color); // 184x56
 
 	// If RTC is available, write the date
 	if (found_sensors[RTC_ID].found_sensor)

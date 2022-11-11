@@ -27,14 +27,16 @@ void send_delayed(void);
 #endif
 
 /** Wakeup triggers for application events */
-#define MOTION_TRIGGER 0b1000000000000000
+#define MOTION_TRIGGER   0b1000000000000000
 #define N_MOTION_TRIGGER 0b0111111111111111
-#define GNSS_FIN 0b0100000000000000
-#define N_GNSS_FIN 0b1011111111111111
-#define VOC_REQ 0b0010000000000000
-#define N_VOC_REQ 0b1101111111111111
-#define TOUCH_EVENT 0b0001000000000000
-#define N_TOUCH_EVENT 0b1110111111111111
+#define GNSS_FIN         0b0100000000000000
+#define N_GNSS_FIN       0b1011111111111111
+#define VOC_REQ          0b0010000000000000
+#define N_VOC_REQ        0b1101111111111111
+#define TOUCH_EVENT      0b0001000000000000
+#define N_TOUCH_EVENT    0b1110111111111111
+#define BSEC_REQ         0b0000001000000000
+#define N_BSEC_REQ       0b1111110111111111
 
 typedef struct sensors_s
 {
@@ -133,10 +135,18 @@ void read_rak1902(void);
 float get_rak1902(void);
 bool init_rak1903(void);
 void read_rak1903();
+#if USE_BSEC == 0
 bool init_rak1906(void);
 void start_rak1906(void);
 bool read_rak1906(void);
 void get_rak1906_values(float *values);
+#else
+bool init_rak1906_bsec(void);
+void start_rak1906_bsec(void);
+bool read_rak1906_bsec(void);
+void get_rak1906_bsec_values(float *values);
+bool do_read_rak1906_bsec(void);
+#endif
 bool init_rak1921(void);
 void rak1921_add_line(char *line);
 void rak1921_show(void);

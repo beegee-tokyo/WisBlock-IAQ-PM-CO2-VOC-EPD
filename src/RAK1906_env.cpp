@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2021
  *
  */
-
+#if USE_BSEC == 0
 #include "app.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
@@ -162,3 +162,4 @@ void get_rak1906_values(float *values)
 // 	MYLOG("BME", "Altitude: %.2f m / %d cm", C, new_val);
 // 	return new_val;
 // }
+#endif // USE_BSEC == 0

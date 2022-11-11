@@ -157,11 +157,17 @@ void app_event_handler(void)
 		g_task_event_type &= N_STATUS;
 		MYLOG("APP", "Timer wakeup");
 
-		if (found_sensors[ENV_ID].found_sensor)
+#if USE_BSEC == 0
+		/*********************************************/
+		/** Select between Bosch BSEC algorithm for  */
+		/** IAQ index or simple T/H/P readings       */
+		/*********************************************/
+		if (found_sensors[ENV_ID].found_sensor) // Using simple T/H/P readings
 		{
 			// Startup the BME680
 			start_rak1906();
 		}
+#endif
 		if (found_sensors[PRESS_ID].found_sensor)
 		{
 			// Startup the LPS22HB
@@ -224,11 +230,17 @@ void app_event_handler(void)
 		}
 
 		// Get data from the slower sensors
-		if (found_sensors[ENV_ID].found_sensor)
+#if USE_BSEC == 0
+		/*********************************************/
+		/** Select between Bosch BSEC algorithm for  */
+		/** IAQ index or simple T/H/P readings       */
+		/*********************************************/
+		if (found_sensors[ENV_ID].found_sensor) // Using simple T/H/P readings
 		{
 			// Read environment data
 			read_rak1906();
 		}
+#endif
 		if (found_sensors[PRESS_ID].found_sensor)
 		{
 			// Read environment data
@@ -303,6 +315,20 @@ void app_event_handler(void)
 		g_task_event_type &= N_VOC_REQ;
 
 		do_read_rak12047();
+	}
+
+	/*********************************************/
+	/** Select between Bosch BSEC algorithm for  */
+	/** IAQ index or simple T/H/P readings       */
+	/*********************************************/
+	// BSEC read request event
+	if ((g_task_event_type & BSEC_REQ) == BSEC_REQ)
+	{
+		g_task_event_type &= N_BSEC_REQ;
+
+#if USE_BSEC == 1
+		do_read_rak1906_bsec();
+#endif
 	}
 }
 

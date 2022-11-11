@@ -19,6 +19,13 @@ For the displays, the RAK14000 EPD module with the 2.13" display can be used. Bu
 - [Software used](#software_used)
 - [How to use it](#how_to_use_it)
 - [Packet data format](#packet_data_format)
+- [Compiler Flags](#compiler-flags)
+   - [Versioning](#versioning)
+   - [Debug options](#debug-options)
+   - [Base Board selection](#base-board-selection)
+   - [Bluetooth selection](#bluetooth-selection)
+   - [Display options](#display-options)
+   - [Usage of Bosch BSEC library](#usage-of-bosch-bsec-library)
 - [Example for a visualization and alert message](#example-for-a-visualization-and-alert-message)
 
 <center><img src = "./assets/Air-Quality-4.jpg" alt = "Mounting" width = 50%></center>
@@ -71,6 +78,7 @@ For the displays, the RAK14000 EPD module with the 2.13" display can be used. Bu
 - [RAK12039 PM Sensor](https://registry.platformio.org/libraries/beegee-tokyo/RAK12039_PM_Sensor) ⤴️
 - [SparkFun SCD30 Arduino Library](https://registry.platformio.org/libraries/sparkfun/SparkFun%20SCD30%20Arduino%20Library) ⤴️
 - [Adafruit EPD](https://registry.platformio.org/libraries/adafruit/Adafruit%20EPD)
+- [Bosch BSEC](https://registry.platformio.org/libraries/boschsensortec/BSEC%20Software%20Library)
 
 ### _REMARK_     
 The project was developed using Platform IO.    
@@ -172,6 +180,41 @@ The content of the packet depends on the modules installed on the WisBlock Base 
 Channel ID's in cursive are extended format and not supported by standard Cayenne LPP data decoders.
 
 Example decoders for TTN, Chirpstack, Helium and Datacake can be found in the folder [decoders](./decoders) ⤴️
+
+----
+# Compiler Flags
+
+The application uses several #define for different application options like the usage of an EPD display or for different Base Boards.    
+All defines are in platformio.ini as build flags    
+
+## Versioning
+
+	-DSW_VERSION_1=1     ; major version increase on API change / not backwards compatible
+	-DSW_VERSION_2=0     ; minor version increase on API change / backward compatible
+	-DSW_VERSION_3=0     ; patch version increase on bugfix, no affect on API
+
+## Debug options
+
+	-DLIB_DEBUG=0        ; 0 Disable LoRaWAN debug output
+	-DAPI_DEBUG=0        ; 0 Disable WisBlock API debug output
+    -DCFG_DEBUG=1        ; 0 Disable BSP debug output
+	-DMY_DEBUG=0         ; 0 Disable application debug output
+
+## Base Board selection
+	-DBASE_BOARD=0       ; 1 = RAK19003 0 = other base boards
+
+## Bluetooth selection
+
+	-DNO_BLE_LED=1
+
+## Display options
+	-DHAS_EPD=0      ; 1 = RAK14000 4.2" present 2 = 2.13" BW present, 3 = 2.13" BWR present, 4 - 3.52" BW present, 0 = no RAK14000 present
+	-DEPD_ROTATION=3 ; 3 = top at cable connection, 1 top opposite of cable connection. Only for 4.2" display
+
+## Usage of Bosch BSEC library
+
+	-D USE_BSEC=1    ; 1 = Use Bosch BSEC algo, 0 = use simple T/H/P readings
+	-L".pio/libdeps/rak4631-release/BSEC Software Library/src/cortex-m4/fpv4-sp-d16-hard"
 
 ----
 
