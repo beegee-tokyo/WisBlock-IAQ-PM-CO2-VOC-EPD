@@ -181,6 +181,9 @@ Channel ID's in cursive are extended format and not supported by standard Cayenn
 
 Example decoders for TTN, Chirpstack, Helium and Datacake can be found in the folder [decoders](./decoders) ⤴️
 
+### _REMARK_
+If using LoRa P2P, the first 8 bytes of the data packet are the devices Dev EUI. This way in LoRa P2P the "gateway" can determine which node sent the packet.
+
 ----
 # Compiler Flags
 

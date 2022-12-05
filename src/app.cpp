@@ -281,8 +281,12 @@ void app_event_handler(void)
 		}
 		else
 		{
+			uint8_t packet_buffer[g_solution_data.getSize() + 8];
+			memcpy(packet_buffer, g_lorawan_settings.node_device_eui, 8);
+			memcpy(&packet_buffer[8], g_solution_data.getBuffer(), g_solution_data.getSize());
+
 			// Send packet over LoRa
-			if (send_p2p_packet(g_solution_data.getBuffer(), g_solution_data.getSize()))
+			if (send_p2p_packet(packet_buffer, g_solution_data.getSize() + 8))
 			{
 				if (found_sensors[OLED_ID].found_sensor)
 				{

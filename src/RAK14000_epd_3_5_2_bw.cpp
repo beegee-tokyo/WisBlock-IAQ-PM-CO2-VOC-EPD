@@ -40,7 +40,7 @@ typedef struct DEPG
 // DEPG  DEPG_HP = {250,122};  //use 2.13" DEPG0213RWS800F41HP as default B/W/R
 // DEPG  DEPG_HP = {212,104};  //  this is for 2.13" DEPG0213BNS800F42HP B/W
 // DEPG DEPG_HP = {400, 300}; //  this is for 4.2" DEPG0420BNS19AF4 B/W
-DEPG DEPG_HP = {360, 240}; //  this is for 5.12" SEO352NQ01 B/W
+DEPG DEPG_HP = {360, 240}; //  this is for 3.52" SEO352NQ01 B/W
 
 /** Display buffer */
 unsigned char frame[10800];
