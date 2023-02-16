@@ -31,7 +31,7 @@ bool delayed_active = false;
 bool battery_check_enabled = false;
 
 /** Set the device name, max length is 10 characters */
-char g_ble_dev_name[10] = "WisBlock";
+char g_ble_dev_name[10] = "RAK";
 
 /** Send Fail counter **/
 uint8_t join_send_fail = 0;
@@ -349,7 +349,7 @@ void ble_data_handler(void)
 		// BLE UART data handling
 		if ((g_task_event_type & BLE_DATA) == BLE_DATA)
 		{
-			MYLOG("AT", "RECEIVED BLE");
+			// MYLOG("AT", "RECEIVED BLE");
 			/** BLE UART data arrived */
 			g_task_event_type &= N_BLE_DATA;
 
@@ -499,23 +499,40 @@ void lora_data_handler(void)
 
 		if (g_lorawan_settings.lorawan_enable)
 		{
-			AT_PRINTF("+EVT:RX_1, RSSI %d, SNR %d\n", g_last_rssi, g_last_snr);
-			AT_PRINTF("+EVT:%d:", g_last_fport);
+			// AT_PRINTF("+EVT:RX_1, RSSI %d, SNR %d\n", g_last_rssi, g_last_snr);
+			// AT_PRINTF("+EVT:%d:", g_last_fport);
+			// for (int idx = 0; idx < g_rx_data_len; idx++)
+			// {
+			// 	AT_PRINTF("%02X", g_rx_lora_data[idx]);
+			// }
+			// AT_PRINTF("\n");
+
+			char rx_msg[512] = {0};
+			int len = sprintf(rx_msg, "+EVT:RX_1:%d:%d:UNICAST:%d:", g_last_rssi, g_last_snr, g_last_fport);
 			for (int idx = 0; idx < g_rx_data_len; idx++)
 			{
-				AT_PRINTF("%02X", g_rx_lora_data[idx]);
+				sprintf(&rx_msg[len] , "%02X", g_rx_lora_data[idx]);
+				len +=2;
 			}
-			AT_PRINTF("\n");
+			AT_PRINTF("%s\n", rx_msg);
 		}
 		else
 		{
-			AT_PRINTF("+EVT:RXP2P, RSSI %d, SNR %d\n", g_last_rssi, g_last_snr);
-			AT_PRINTF("+EVT:");
+			// AT_PRINTF("+EVT:RXP2P, RSSI %d, SNR %d\n", g_last_rssi, g_last_snr);
+			// AT_PRINTF("+EVT:");
+			// for (int idx = 0; idx < g_rx_data_len; idx++)
+			// {
+			// 	AT_PRINTF("%02X", g_rx_lora_data[idx]);
+			// }
+			// AT_PRINTF("\n");
+			char rx_msg[512] = {0};
+			int len = sprintf(rx_msg, "+EVT:RXP2P:%d:%d:", g_last_rssi, g_last_snr);
 			for (int idx = 0; idx < g_rx_data_len; idx++)
 			{
-				AT_PRINTF("%02X", g_rx_lora_data[idx]);
+				sprintf(&rx_msg[len], "%02X", g_rx_lora_data[idx]);
+				len += 2;
 			}
-			AT_PRINTF("\n");
+			AT_PRINTF("%s\n", rx_msg);
 		}
 	}
 }

@@ -7,7 +7,7 @@ With the release of the new RAK12037 CO2 and RAK12039 Particle Matter sensor the
 The final device in this tutorial is measuring CO2, Particle Matter, VOC, temperature, humidity and barometric pressure. It can be comined with the RAK14000 to display the different values. But more important, it sends the measured values over LoRaWAN for further processing and taking actions.    
 
 ### _REMARK 1_     
-This firmware is using the [WisBlock API](https://github.com/beegee-tokyo/WisBlock-API) ⤴️ which helps to create low power consumption application and taking the load to handle communications from your shoulder.    
+This firmware is using the [WisBlock API V2](https://github.com/beegee-tokyo/WisBlock-API-V2) ⤴️ which helps to create low power consumption application and taking the load to handle communications from your shoulder.    
 
 ### _REMARK 2_
 For the displays, the RAK14000 EPD module with the 2.13" display can be used. But for better visualization this code supports as well a 3.52" and a 4.2" display. The 4.2" display might be added as a variant to the WisBlock RAK14000 in the future.
@@ -57,7 +57,7 @@ For the displays, the RAK14000 EPD module with the 2.13" display can be used. Bu
 - [Adafruit nRF52 BSP](https://docs.platformio.org/en/latest/boards/nordicnrf52/adafruit_feather_nrf52832.html) ⤴️
 - [Patch to use RAK4631 with PlatformIO](https://github.com/RAKWireless/WisBlock/tree/master/PlatformIO) ⤴️
 ## LoRaWAN and BLE communication
-- [WisBlock-API](https://registry.platformio.org/libraries/beegee-tokyo/WisBlock-API) ⤴️
+- [WisBlock-API-V2](https://registry.platformio.org/libraries/beegee-tokyo/WisBlock-API-V2) ⤴️
 - [SX126x-Arduino LoRaWAN library](https://registry.platformio.org/libraries/beegee-tokyo/SX126x-Arduino) ⤴️
 - [CayenneLPP](https://registry.platformio.org/libraries/sabas1080/CayenneLPP) ⤴️
 - [ArduinoJson](https://registry.platformio.org/libraries/bblanchon/ArduinoJson) ⤴️
@@ -78,7 +78,7 @@ For the displays, the RAK14000 EPD module with the 2.13" display can be used. Bu
 - [RAK12039 PM Sensor](https://registry.platformio.org/libraries/beegee-tokyo/RAK12039_PM_Sensor) ⤴️
 - [SparkFun SCD30 Arduino Library](https://registry.platformio.org/libraries/sparkfun/SparkFun%20SCD30%20Arduino%20Library) ⤴️
 - [Adafruit EPD](https://registry.platformio.org/libraries/adafruit/Adafruit%20EPD)
-- [Bosch BSEC](https://registry.platformio.org/libraries/boschsensortec/BSEC%20Software%20Library)
+- [Bosch BSEC V1.6.1480](https://registry.platformio.org/libraries/boschsensortec/BSEC%20Software%20Library)
 
 ### _REMARK_     
 The project was developed using Platform IO.    
@@ -97,6 +97,12 @@ Compile the firmware and flash it on a WisBlock with all required modules instal
 
 Connect over USB to setup the LPWAN credentials. Use the DevEUI printed on the RAK4631, use the AppEUI and AppKey from your LPWAN server. Do NOT activate automatic join yet. As weather sensor levels are not changing very fast, it might be sufficient to set the send frequency to every 10 minutes. The send frequency is set in seconds, so the value would be  10 * 60 ==> 600
 
+The AT commands are compatible with RAKwireless RUI3 AT commands. Not all AT commands are supported due to the differences in the LoRaWAN stack.    
+See [AT Command Manual](https://docs.rakwireless.com/RUI3/Serial-Operating-Modes/AT-Command-Manual/)
+
+Alternative the [RAKwireless WisToolBox](https://docs.rakwireless.com/Product-Categories/Software-Tools/WisToolBox/Overview/) ⤴️ can be used.       
+WisToolBox makes it easy to setup all required parameters through a simple user interface. _**(Work in progress, not all functions available)**_    
+
 **Example AT commands:**
 ```AT
 AT+NWM=1
@@ -112,18 +118,21 @@ AT+SENDFREQ=600
 | --- | --- | 
 | AT+NWM=1                                   | set the node into LoRaWAN mode |
 | AT+NJM=1                                   | set network join method to OTAA |
-| AT+BAND=10                                 | set LPWAN region (here AS923-3) see [AT Command Manual](https://github.com/beegee-tokyo/WisBlock-API/blob/main/AT-Commands.md#atband) ⤴️ for all regions |
+| AT+BAND=10                                 | set LPWAN region (here AS923-3) see [AT Command Manual](https://docs.rakwireless.com/RUI3/Serial-Operating-Modes/AT-Command-Manual/#at-band) ⤴️ for all regions |
 | AT+DEVEUI=1000000000000001                 | set the device EUI, best to use the DevEUI that is printed on the label of your WisBlock Core module |
 | AT+APPEUI=AB00AB00AB00AB00                 | set the application EUI, required on the LoRaWAN server |
 | AT+APPKEY=AB00AB00AB00AB00AB00AB00AB00AB00 | set the application Key, used to encrypt the data packet during network join |
 | AT+SENDFREQ=600                            | set the frequency the sensor node will send data packets. 600 == 10 x 60 seconds == 10minutes |
 
 ### _REMARK_
-The manual for all AT commands can be found here: [AT-Commands.md](https://github.com/beegee-tokyo/WisBlock-API/blob/main/AT-Commands.md) ⤴️
+The manual for all AT commands can be found here: [AT Command Manual](https://docs.rakwireless.com/RUI3/Serial-Operating-Modes/AT-Command-Manual/) ⤴️
 
 ### Over BLE
 Use the [WisBlock Toolbox](https://play.google.com/store/apps/details?id=tk.giesecke.wisblock_toolbox) ⤴️, connect over Bluetooth with the Soil Sensor and setup the credentials. Do NOT activate automatic join yet.
 
+Alternative the [RAKwireless WisToolBox](https://docs.rakwireless.com/Product-Categories/Software-Tools/WisToolBox/Overview/) ⤴️ can be used.    
+WisToolBox makes it easy to setup all required parameters through a simple user interface. _**(Work in progress, not all functions available)**_    
+      
 ----
 
 # Packet data format
@@ -179,10 +188,13 @@ The content of the packet depends on the modules installed on the WisBlock Base 
 ### _REMARK_
 Channel ID's in cursive are extended format and not supported by standard Cayenne LPP data decoders.
 
-Example decoders for TTN, Chirpstack, Helium and Datacake can be found in the folder [decoders](./decoders) ⤴️
+Example decoder [RAKwireless_Standardized_Payload.js] for TTN, Chirpstack, Helium and Datacake can be found in the folder [RAKwireless_Standardized_Payload](https://github.com/RAKWireless/RAKwireless_Standardized_Payload) repo. ⤴️
 
 ### _REMARK_
 If using LoRa P2P, the first 8 bytes of the data packet are the devices Dev EUI. This way in LoRa P2P the "gateway" can determine which node sent the packet.
+
+### _REMARK_
+If the Bosch BSEC library is used, Gas Resistance 2 value is the IAQ index calculated by BSEC algorithm.     
 
 ----
 # Compiler Flags

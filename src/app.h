@@ -22,7 +22,7 @@
 #endif
 // minor version increase on API change / backward compatible
 #ifndef SW_VERSION_2
-#define SW_VERSION_2 0
+#define SW_VERSION_2 1
 #endif
 // patch version increase on bugfix, no affect on API
 #ifndef SW_VERSION_3
@@ -51,7 +51,7 @@ using namespace std::chrono;
 
 #include <Wire.h>
 /** Include the WisBlock-API */
-#include <WisBlock-API.h>
+#include <WisBlock-API-V2.h>
 
 // Debug output set to 0 to disable app debug output
 #ifndef MY_DEBUG
@@ -112,32 +112,6 @@ using namespace std::chrono;
 #endif
 #endif
 
-#if defined NRF52_SERIES
-#define AT_PRINTF(...)                  \
-	Serial.printf(__VA_ARGS__);         \
-	if (g_ble_uart_is_connected)        \
-	{                                   \
-		g_ble_uart.printf(__VA_ARGS__); \
-	}
-#endif
-
-#if defined ARDUINO_ARCH_RP2040
-#define AT_PRINTF(...) \
-	Serial.printf(__VA_ARGS__);
-#endif
-
-#if defined ESP32
-#define AT_PRINTF(...)                                                  \
-	Serial.printf(__VA_ARGS__);                                         \
-	if (g_ble_uart_is_connected)                                        \
-	{                                                                   \
-		char buff[255];                                                 \
-		int len = sprintf(buff, __VA_ARGS__);                           \
-		uart_tx_characteristic->setValue((uint8_t *)buff, (size_t)len); \
-		uart_tx_characteristic->notify(true);                           \
-		delay(50);                                                      \
-	}
-#endif
 
 /** Application function definitions */
 void setup_app(void);

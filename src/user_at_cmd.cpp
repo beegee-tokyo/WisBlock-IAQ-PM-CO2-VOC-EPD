@@ -2,7 +2,7 @@
  * @file user_at_cmd.cpp
  * @author Bernd Giesecke (bernd.giesecke@rakwireless.com)
  * @brief Handle user defined AT commands
- * @version 0.3
+ * @version 0.4
  * @date 2022-01-29
  *
  * @copyright Copyright (c) 2022
@@ -47,9 +47,9 @@ int at_query_modules(void)
  *
  */
 atcmd_t g_user_at_cmd_list_modules[] = {
-	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  |*/
+	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  | Permissions |*/
 	// Module commands
-	{"+MOD", "List all connected I2C devices", at_query_modules, NULL, at_query_modules},
+	{"+MOD", "List all connected I2C devices", at_query_modules, NULL, at_query_modules, "RW"},
 };
 
 /*****************************************
@@ -155,9 +155,9 @@ static int at_query_rtc(void)
 }
 
 atcmd_t g_user_at_cmd_list_rtc[] = {
-	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  |*/
+	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  | Permissions |*/
 	// RTC commands
-	{"+RTC", "Get/Set RTC time and date", at_query_rtc, at_set_rtc, at_query_rtc},
+	{"+RTC", "Get/Set RTC time and date", at_query_rtc, at_set_rtc, at_query_rtc, "RW"},
 };
 
 /*****************************************
@@ -256,10 +256,11 @@ void save_batt_settings(bool check_batt_enables)
 #endif
 }
 
+/** Structure for AT commands */
 atcmd_t g_user_at_cmd_list_batt[] = {
-	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  |*/
+	/*|    CMD    |     AT+CMD?      |    AT+CMD=?    |  AT+CMD=value |  AT+CMD  | Permissions |*/
 	// Battery check commands
-	{"+BATCHK", "Enable/Disable the battery charge check", at_query_batt_check, at_set_batt_check, at_query_batt_check},
+	{"+BATCHK", "Enable/Disable the battery charge check", at_query_batt_check, at_set_batt_check, at_query_batt_check, "RW"},
 };
 
 /** Number of user defined AT commands */
@@ -279,6 +280,8 @@ void init_user_at(void)
 	uint16_t index_next_cmds = 0;
 	uint16_t required_structure_size = sizeof(g_user_at_cmd_list_batt);
 	MYLOG("USR_AT", "Structure size %d Battery", required_structure_size);
+	required_structure_size += sizeof(g_user_at_cmd_list_modules);
+	MYLOG("USR_AT", "Structure size %d Modules", required_structure_size);
 
 	// Get required size of structure
 	if (found_sensors[RTC_ID].found_sensor)
@@ -297,6 +300,12 @@ void init_user_at(void)
 	memcpy((void *)&g_user_at_cmd_list[index_next_cmds], (void *)g_user_at_cmd_list_batt, sizeof(g_user_at_cmd_list_batt));
 	index_next_cmds += sizeof(g_user_at_cmd_list_batt) / sizeof(atcmd_t);
 	MYLOG("USR_AT", "Index after adding battery check %d", index_next_cmds);
+
+	MYLOG("USR_AT", "Adding module AT commands");
+	g_user_at_cmd_num += sizeof(g_user_at_cmd_list_modules) / sizeof(atcmd_t);
+	memcpy((void *)&g_user_at_cmd_list[index_next_cmds], (void *)g_user_at_cmd_list_modules, sizeof(g_user_at_cmd_list_modules));
+	index_next_cmds += sizeof(g_user_at_cmd_list_modules) / sizeof(atcmd_t);
+	MYLOG("USR_AT", "Index after adding modules check %d", index_next_cmds);
 
 	if (found_sensors[RTC_ID].found_sensor)
 	{
