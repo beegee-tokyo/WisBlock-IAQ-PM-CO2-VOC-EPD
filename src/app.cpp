@@ -12,7 +12,7 @@
  */
 
 #include "app.h"
-
+#include <NCP5623.h>
 /** Timer for delayed sending to keep duty cycle */
 #ifdef NRF52_SERIES
 SoftwareTimer delayed_sending;
@@ -48,11 +48,25 @@ char disp_txt[64] = {0};
  * @brief Application specific setup functions
  *
  */
+NCP5623 rgb;
+void pir_int(void)
+{
+	MYLOG("APP", "PIR");
+	Serial.flush();
+	//wake_rak14000();
+}
+
+void button_int(void)
+{
+	MYLOG("APP", "Button");
+	Serial.flush();
+}
+
 void setup_app(void)
 {
 	// Initialize Serial for debug output
 	Serial.begin(115200);
-
+	//delay(5000);
 	time_t serial_timeout = millis();
 	// On nRF52840 the USB serial is not available immediately
 	while (!Serial)
@@ -60,7 +74,7 @@ void setup_app(void)
 		if ((millis() - serial_timeout) < 5000)
 		{
 			delay(100);
-			digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+			//digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 		}
 		else
 		{
@@ -71,18 +85,45 @@ void setup_app(void)
 	pinMode(WB_IO2, OUTPUT);
 	digitalWrite(WB_IO2, HIGH);
 
+	//CO2 PWOER
+	pinMode(28, OUTPUT);
+	digitalWrite(28, HIGH);
+
+	//VOC PWOER
+	pinMode(20, OUTPUT);
+	digitalWrite(28, HIGH);
+
+	//PIR PWOER
+	pinMode(2, OUTPUT);
+	digitalWrite(2, HIGH);
+
+	//PIR INTERRPUT
+	pinMode(25, INPUT);
+    attachInterrupt(25, pir_int, RISING);
+
+	//BUTTON
+	pinMode(24, INPUT);
+    attachInterrupt(24, button_int, FALLING);
+
+
 #if HAS_EPD > 0
 	MYLOG("APP", "Init RAK14000");
 	init_rak14000();
 #endif
 
 	delay(500);
-
 	// Scan the I2C interfaces for devices
 	find_modules();
 
 	// Initialize the User AT command list
 	init_user_at();
+
+	rgb.begin();
+    rgb.setCurrent(8);
+    rgb.setColor(255,255,255); // WHITE
+
+	delay(1000);
+	rgb.setColor(0,0,0); // WHITE
 
 #if defined NRF52_SERIES || defined ESP32
 #ifdef BLE_OFF
@@ -154,6 +195,7 @@ void app_event_handler(void)
 	// Timer triggered event
 	if ((g_task_event_type & STATUS) == STATUS)
 	{
+	
 		g_task_event_type &= N_STATUS;
 		MYLOG("APP", "Timer wakeup");
 

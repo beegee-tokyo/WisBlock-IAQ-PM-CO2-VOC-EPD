@@ -171,17 +171,17 @@ void init_rak14000(void)
 	pinMode(POWER_ENABLE, INPUT_PULLUP);
 	digitalWrite(POWER_ENABLE, HIGH);
 
-	// set left button interrupt
-	pinMode(LEFT_BUTTON, INPUT);
-	attachInterrupt(LEFT_BUTTON, butt_left_int, FALLING);
+	// // set left button interrupt
+	// pinMode(LEFT_BUTTON, INPUT);
+	// attachInterrupt(LEFT_BUTTON, butt_left_int, FALLING);
 
-	// set middle button interrupt
-	pinMode(MIDDLE_BUTTON, INPUT);
-	attachInterrupt(MIDDLE_BUTTON, butt_mid_int, FALLING);
+	// // set middle button interrupt
+	// pinMode(MIDDLE_BUTTON, INPUT);
+	// attachInterrupt(MIDDLE_BUTTON, butt_mid_int, FALLING);
 
-	// set right button interrupt
-	pinMode(RIGHT_BUTTON, INPUT);
-	attachInterrupt(RIGHT_BUTTON, butt_right_int, FALLING);
+	// // set right button interrupt
+	// pinMode(RIGHT_BUTTON, INPUT);
+	// attachInterrupt(RIGHT_BUTTON, butt_right_int, FALLING);
 
 #if defined NRF52_SERIES || defined ESP32
 	// Create the EPD event semaphore
