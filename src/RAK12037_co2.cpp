@@ -60,7 +60,7 @@ void read_rak12037(void)
 	{
 		MYLOG("SCD30", "Waiting for data");
 		delay(500);
-		if ((millis() - start_time) > 5000)
+		if ((millis() - start_time) > 10000)
 		{
 			// timeout, no data available
 			MYLOG("SCD30", "Timeout");
@@ -83,4 +83,33 @@ void read_rak12037(void)
 #if HAS_EPD > 0
 	set_co2_rak14000(co2_reading);
 #endif
+}
+
+/**
+ * @brief Wake up RAK12037 from sleep
+ *
+ */
+void startup_rak12037(void)
+{
+	// digitalWrite(CO2_PM_POWER, HIGH); // power off RAK12037
+	// Change number of seconds between measurements: 2 to 1800 (30 minutes), stored in non-volatile memory of SCD30
+	scd30.setMeasurementInterval(10);
+
+	// Enable self calibration
+	scd30.setAutoSelfCalibration(true);
+
+	// Start the measurements
+	scd30.beginMeasuring();
+	// init_rak12037();
+}
+
+/**
+ * @brief Put the RAK12037 into sleep mode
+ *
+ */
+void shut_down_rak12037(void)
+{
+	// Disable power
+	// digitalWrite(CO2_PM_POWER, LOW); // power off RAK12037
+	scd30.StopMeasurement();
 }

@@ -84,21 +84,40 @@ void read_rak1901(void)
  */
 void get_rak1901_values(float *values)
 {
-	if (_has_last_values)
+	// if (_has_last_values)
 	{
 		_has_last_values = false;
 		values[0] = _last_temp;
 		values[1] = _last_humid;
 		return;
 	}
-	else
-	{
-		shtc3.update();
-		if (shtc3.lastStatus == SHTC3_Status_Nominal)
-		{
-			values[0] = shtc3.toDegC();
-			values[1] = shtc3.toPercent();
-		}
-	}
-	return;
+	// else
+	// {
+	// 	shtc3.update();
+	// 	if (shtc3.lastStatus == SHTC3_Status_Nominal)
+	// 	{
+	// 		values[0] = shtc3.toDegC();
+	// 		values[1] = shtc3.toPercent();
+	// 	}
+	// }
+	// return;
+}
+
+/**
+ * @brief Wake up RAK1901 from sleep
+ *
+ */
+void start_up_rak1901(void)
+{
+	shtc3.wake(false);
+	shtc3.update();
+}
+
+/**
+ * @brief Put the RAK1901 into sleep mode
+ * 
+ */
+void shut_down_rak1901(void)
+{
+	shtc3.sleep(true);
 }

@@ -93,3 +93,48 @@ void read_rak12039(void)
 	// digitalWrite(SET_PIN, LOW);
 	return;
 }
+
+/**
+ * @brief Wake up RAK12039 from sleep
+ *
+ */
+void startup_rak12039(void)
+{
+	// Sensor on
+	// digitalWrite(CO2_PM_POWER, HIGH); // power on RAK12039
+	digitalWrite(SET_PIN, HIGH);
+	// Wait for wakeup
+	time_t wait_sensor = millis();
+	MYLOG("PM", "RAK12039 wake-up scan start %ld ms", millis());
+	byte error;
+	while (1)
+	{
+		delay(500);
+		Wire.beginTransmission(0x12);
+		error = Wire.endTransmission();
+		if (error == 0)
+		{
+			MYLOG("PM", "RAK12039 answered at %ld ms", millis());
+			break;
+		}
+		if ((millis() - wait_sensor) > 10000)
+		{
+			MYLOG("PM", "RAK12039 timeout after 10000 ms");
+			break;
+		}
+	}
+
+	// init_rak12039();
+}
+
+/**
+ * @brief Put the RAK12037 into sleep mode
+ *
+ */
+void shut_down_rak12039(void)
+{
+	// Disable power
+	// digitalWrite(CO2_PM_POWER, LOW); // power off RAK12039
+
+	digitalWrite(SET_PIN, LOW); // Sensor on
+}

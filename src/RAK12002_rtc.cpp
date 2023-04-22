@@ -27,10 +27,10 @@ bool init_rak12002(void)
 	Wire.begin();
 	rtc.initI2C(Wire);
 
-	rtc.useEEPROM(false);
-
 	rtc.writeToRegister(0x35, 0x00);
 	rtc.writeToRegister(0x37, 0xB4); // Direct Switching Mode (DSM): when VDD < VBACKUP, switchover occurs from VDD to VBACKUP
+
+	rtc.useEEPROM(false);
 
 	rtc.set24HourMode(); // Set the device to use the 24hour format (default) instead of the 12 hour format
 

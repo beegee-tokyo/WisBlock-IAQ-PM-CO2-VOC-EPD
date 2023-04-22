@@ -71,13 +71,6 @@ void setup_app(void)
 	pinMode(WB_IO2, OUTPUT);
 	digitalWrite(WB_IO2, HIGH);
 
-#if HAS_EPD > 0
-	MYLOG("APP", "Init RAK14000");
-	init_rak14000();
-#endif
-
-	delay(500);
-
 	// Scan the I2C interfaces for devices
 	find_modules();
 
@@ -104,6 +97,13 @@ void setup_app(void)
 bool init_app(void)
 {
 	MYLOG("APP", "init_app");
+
+#if HAS_EPD > 0
+	MYLOG("APP", "Init RAK14000");
+	init_rak14000();
+#endif
+
+	delay(500);
 
 	api_set_version(SW_VERSION_1, SW_VERSION_2, SW_VERSION_3);
 
@@ -141,6 +141,16 @@ bool init_app(void)
 		rak1921_add_line(disp_txt);
 	}
 
+	// Prepare timer to send after the sensors were awake for 30 seconds
+	delayed_sending.begin(30000, send_delayed, NULL, false);
+
+	if (!g_lorawan_settings.lorawan_enable)
+	{
+		api_wake_loop(STATUS);
+	}
+
+	init_button();
+	
 	return true;
 }
 
@@ -151,36 +161,44 @@ bool init_app(void)
  */
 void app_event_handler(void)
 {
-	// Timer triggered event
 	if ((g_task_event_type & STATUS) == STATUS)
 	{
+		MYLOG("APP", "Wake-up, power up sensors");
+		power_modules(true);
 		g_task_event_type &= N_STATUS;
-		MYLOG("APP", "Timer wakeup");
+		delayed_sending.start();
+	}
 
-#if USE_BSEC == 0
-		/*********************************************/
-		/** Select between Bosch BSEC algorithm for  */
-		/** IAQ index or simple T/H/P readings       */
-		/*********************************************/
-		if (found_sensors[ENV_ID].found_sensor) // Using simple T/H/P readings
-		{
-			// Startup the BME680
-			start_rak1906();
-		}
-#endif
-		if (found_sensors[PRESS_ID].found_sensor)
-		{
-			// Startup the LPS22HB
-			start_rak1902();
-		}
+	// Timer triggered event
+	if ((g_task_event_type & SEND_NOW) == SEND_NOW)
+	{
+		g_task_event_type &= N_SEND_NOW;
+		MYLOG("APP", "Start reading and sending");
 
-#if defined NRF52_SERIES || defined ESP32
-		// If BLE is enabled, restart Advertising
-		if (g_enable_ble)
-		{
-			restart_advertising(15);
-		}
-#endif
+// #if USE_BSEC == 0
+// 		/*********************************************/
+// 		/** Select between Bosch BSEC algorithm for  */
+// 		/** IAQ index or simple T/H/P readings       */
+// 		/*********************************************/
+// 		if (found_sensors[ENV_ID].found_sensor) // Using simple T/H/P readings
+// 		{
+// 			// Startup the BME680
+// 			start_rak1906();
+// 		}
+// #endif
+// 		if (found_sensors[PRESS_ID].found_sensor)
+// 		{
+// 			// Startup the LPS22HB
+// 			start_rak1902();
+// 		}
+
+// #if defined NRF52_SERIES || defined ESP32
+// 		// If BLE is enabled, restart Advertising
+// 		if (g_enable_ble)
+// 		{
+// 			restart_advertising(15);
+// 		}
+// #endif
 
 		// Reset the packet
 		g_solution_data.reset();
@@ -227,24 +245,6 @@ void app_event_handler(void)
 				api_timer_restart(g_lorawan_settings.send_repeat_time);
 				MYLOG("APP", "Battery protection deactivated");
 			}
-		}
-
-		// Get data from the slower sensors
-#if USE_BSEC == 0
-		/*********************************************/
-		/** Select between Bosch BSEC algorithm for  */
-		/** IAQ index or simple T/H/P readings       */
-		/*********************************************/
-		if (found_sensors[ENV_ID].found_sensor) // Using simple T/H/P readings
-		{
-			// Read environment data
-			read_rak1906();
-		}
-#endif
-		if (found_sensors[PRESS_ID].found_sensor)
-		{
-			// Read environment data
-			read_rak1902();
 		}
 
 		MYLOG("APP", "Packetsize %d", g_solution_data.getSize());
@@ -311,6 +311,9 @@ void app_event_handler(void)
 		}
 		// Reset the packet
 		g_solution_data.reset();
+
+		// Power down the modules
+		power_modules(false);
 	}
 
 	// VOC read request event
@@ -413,13 +416,13 @@ void lora_data_handler(void)
 			/// \todo here join could be restarted.
 			lmh_join();
 
-#if defined NRF52_SERIES || defined ESP32
-			// If BLE is enabled, restart Advertising
-			if (g_enable_ble)
-			{
-				restart_advertising(15);
-			}
-#endif
+// #if defined NRF52_SERIES || defined ESP32
+// 			// If BLE is enabled, restart Advertising
+// 			if (g_enable_ble)
+// 			{
+// 				restart_advertising(15);
+// 			}
+// #endif
 
 			join_send_fail++;
 			if (join_send_fail == 10)
@@ -547,13 +550,13 @@ void lora_data_handler(void)
 #ifdef NRF52_SERIES
 void send_delayed(TimerHandle_t unused)
 {
-	api_wake_loop(STATUS);
+	api_wake_loop(SEND_NOW);
 	delayed_sending.stop();
 }
 #elif defined ESP32 || defined ARDUINO_ARCH_RP2040
 void send_delayed(void)
 {
-	api_wake_loop(STATUS);
+	api_wake_loop(SEND_NOW);
 	delayed_sending.detach();
 }
 #endif

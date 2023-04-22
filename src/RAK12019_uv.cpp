@@ -91,3 +91,21 @@ void read_rak12019(void)
 	g_solution_data.addAnalogInput(LPP_CHANNEL_UVI, _uvi_read);
 	g_solution_data.addLuminosity(LPP_CHANNEL_UVS, _uvs_read);
 }
+
+/**
+ * @brief Wake up RAK12019 from sleep
+ *
+ */
+void startup_rak12019(void)
+{
+	// No low power functionality found
+}
+
+/**
+ * @brief Put the RAK12019 into sleep mode
+ *
+ */
+void shut_down_rak12019(void)
+{
+	// No low power functionality found
+}

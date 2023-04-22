@@ -30,15 +30,9 @@ bool init_rak1902(void)
 	}
 
 	lps.setLowPower(true);
-	lps.setOutputRate(LPS35HW::OutputRate_OneShot);	   // get results on demand
+	lps.setOutputRate(LPS35HW::OutputRate_75Hz);	   // 75 Hz sample rate
 	lps.setLowPassFilter(LPS35HW::LowPassFilter_ODR9); // default is off
 	return true;
-}
-
-void start_rak1902(void)
-{
-	lps.requestOneShot(); // important to request new data before reading
-	delay(250);			  // Give the sensor some time
 }
 
 /**
@@ -51,11 +45,14 @@ void read_rak1902(void)
 {
 	MYLOG("PRESS", "Reading LPS22HB");
 
-	delay(500); // Give the sensor some time
-
+	// Give the sensor some time to read
+	delay(100);
 	float pressure = lps.readPressure(); // hPa
 
-	// MYLOG("PRESS", "P: %.2f MSL: %.2f", pressure, at_MSL);
+	// Switch back to low power mode
+	lps.setLowPower(true);
+	lps.setOutputRate(LPS35HW::OutputRate_OneShot); // 75 Hz sample rate
+
 	MYLOG("PRESS", "P: %.2f", pressure);
 
 	g_solution_data.addBarometricPressure(LPP_CHANNEL_PRESS, pressure);
@@ -77,30 +74,22 @@ float get_rak1902(void)
 	return lps.readPressure(); // hPa
 }
 
-// /**
-//  * @brief Calculate and return the altitude
-//  *        based on the barometric pressure
-//  *        Requires to have MSL set
-//  *
-//  * @return uint16_t altitude in cm
-//  */
-// uint16_t get_alt_rak1902(void)
-// {
-// 	// Get latest values
-// 	start_rak1902();
-// 	delay(250);
+/**
+ * @brief Wake up RAK1902 from sleep
+ *
+ */
+void startup_rak1902(void)
+{
+	lps.setLowPower(false);						 // Disable low power mode
+	lps.setOutputRate(LPS35HW::OutputRate_75Hz); // 75 Hz sample rate
+}
 
-// 	MYLOG("PRESS", "Compute altitude");
-// 	// pressure in HPa
-// 	float pressure = lps.readPressure(); // hPa
-// 	MYLOG("PRESS", "P: %.2f", pressure);
-
-// 	float A = pressure / at_MSL; // (1013.25) by default;
-// 	float B = 1 / 5.25588;
-// 	float C = pow(A, B);
-// 	C = 1.0 - C;
-// 	C = C / 0.0000225577;
-// 	uint16_t new_val = C * 100;
-// 	MYLOG("PRESS", "Altitude: %.2f m / %d cm", C, new_val);
-// 	return new_val;
-// }
+/**
+ * @brief Put the RAK1902 into sleep mode
+ *
+ */
+void shut_down_rak1902(void)
+{
+	lps.setLowPower(true);
+	lps.setOutputRate(LPS35HW::OutputRate_OneShot); // 75 Hz sample rate
+}

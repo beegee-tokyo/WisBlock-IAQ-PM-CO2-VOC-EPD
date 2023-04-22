@@ -58,6 +58,9 @@ sensors_t found_sensors[] = {
 	{0x59, false}, // 38 ✔ RAK5814 ACC608 encryption module (limited I2C speed 100000) !! conflict with RAK12047, RAK13600, RAK13003
 };
 
+/** Flag if sensors are powered down */
+bool g_sensors_off = false;
+
 /**
  * @brief Scan both I2C bus for devices
  *
@@ -68,8 +71,10 @@ void find_modules(void)
 	byte error;
 	uint8_t num_dev = 0;
 
-	// pinMode(WB_IO2, OUTPUT);
-	// digitalWrite(WB_IO2, HIGH);
+	MYLOG("SCAN", "Start search for modules");
+
+	pinMode(WB_IO2, OUTPUT);
+	digitalWrite(WB_IO2, HIGH);
 
 	// RAK12039 has extra GPIO for power control
 	// On/Off control pin
@@ -309,11 +314,6 @@ void announce_modules(void)
 	{
 		AT_PRINTF("+EVT:RAK12047 OK\n");
 	}
-
-// Set delayed sending to 2 seconds
-#ifdef NRF52_SERIES
-	delayed_sending.begin(2000, send_delayed, NULL, false);
-#endif
 }
 
 /**
@@ -326,6 +326,12 @@ void get_sensor_values(void)
 	{
 		// Read environment data
 		read_rak1901();
+	}
+
+	if (found_sensors[BAR_ID].found_sensor)
+	{
+		// Read barometer data
+		read_rak1902();
 	}
 
 	if (found_sensors[LIGHT_ID].found_sensor)
@@ -346,11 +352,11 @@ void get_sensor_values(void)
 	}
 #else
 	// RAK1906 needs time to get correct value. Reading was already started and results will be gotten in app.cpp
-	// if (found_sensors[ENV_ID].found_sensor)
-	// {
-	// 	// Start reading environment data
-	// 	start_rak1906();
-	// }
+	if (found_sensors[ENV_ID].found_sensor)
+	{
+		// Start reading environment data
+		read_rak1906();
+	}
 #endif
 
 	if (found_sensors[CO2_ID].found_sensor)
@@ -381,5 +387,114 @@ void get_sensor_values(void)
 	{
 		// Get the voc sensor values
 		read_rak12047();
+	}
+}
+
+/**
+ * @brief Shut down or switch on modules
+ *
+ * @param switch_on if true, wake up modules, else power down modules
+ */
+void power_modules(bool switch_on)
+{
+	if (!switch_on)
+	{
+		g_sensors_off = true;
+	}
+
+	if (found_sensors[TEMP_ID].found_sensor)
+	{
+		if (switch_on)
+		{
+			start_up_rak1901();
+		}
+		else
+		{
+			shut_down_rak1901();
+		}
+	}
+
+	if (found_sensors[PRESS_ID].found_sensor)
+	{
+		if (switch_on)
+		{
+			startup_rak1902();
+		}
+		else
+		{
+			shut_down_rak1902();
+		}
+	}
+
+	if (found_sensors[LIGHT_ID].found_sensor)
+	{
+		if (switch_on)
+		{
+			startup_rak1903();
+		}
+		else
+		{
+			shut_down_rak1903();
+		}
+	}
+
+	if (found_sensors[LIGHT2_ID].found_sensor)
+	{
+		if (switch_on)
+		{
+			startup_rak12010();
+		}
+		else
+		{
+			shut_down_rak12010();
+		}
+	}
+
+	if (found_sensors[UVL_ID].found_sensor)
+	{
+		if (switch_on)
+		{
+			startup_rak12019();
+		}
+		else
+		{
+			shut_down_rak12019();
+		}
+	}
+
+	if (found_sensors[CO2_ID].found_sensor || found_sensors[PM_ID].found_sensor)
+	{
+		if (found_sensors[CO2_ID].found_sensor)
+		{
+			if (switch_on)
+			{
+				startup_rak12037();
+			}
+			else
+			{
+				shut_down_rak12037();
+			}
+		}
+
+		if (found_sensors[PM_ID].found_sensor)
+		{
+			if (switch_on)
+			{
+				startup_rak12039();
+			}
+			else{
+				shut_down_rak12039();
+			}
+		}
+
+		// if (!switch_on)
+		// {
+		// 	digitalWrite(CO2_PM_POWER, LOW); // power off RAK12037 and RAK12039
+		// }
+	}
+
+	if (switch_on)
+	{
+		g_sensors_off = false;
 	}
 }

@@ -59,15 +59,33 @@ void read_rak1903()
 	OPT3001 result = opt3001.readResult();
 	if (result.error == NO_ERROR)
 	{
-		uint16_t light_int = (uint16_t)(result.lux);
+		last_light_lux = (uint16_t)(result.lux);
 
-		MYLOG("LIGHT", "L: %.2f", (float)light_int / 1.0);
+		MYLOG("LIGHT", "L: %.2f", last_light_lux);
 
-		g_solution_data.addLuminosity(LPP_CHANNEL_LIGHT, (uint32_t)(light_int));
+		g_solution_data.addLuminosity(LPP_CHANNEL_LIGHT, (uint32_t)(last_light_lux));
 	}
 	else
 	{
 		MYLOG("LIGHT", "Error reading OPT3001");
 		g_solution_data.addLuminosity(LPP_CHANNEL_LIGHT, 0);
 	}
+}
+
+/**
+ * @brief Wake up RAK1903 from sleep
+ *
+ */
+void startup_rak1903(void)
+{
+	// No low power functionality found
+}
+
+/**
+ * @brief Put the RAK1903 into sleep mode
+ *
+ */
+void shut_down_rak1903(void)
+{
+	// No low power functionality found
 }
